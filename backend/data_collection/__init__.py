@@ -9,15 +9,17 @@ import time
 import os
 import re
 import requests
+import random
 
 __all__ = [
     'setup_driver',
     'download_single_case',
     'parallel_download',
     'By',          
-    'EC',           
+    'EC',         
     'time',         
-    're'            
+    're',
+    'random'          
 ]
 
 def setup_driver(dir):
@@ -29,7 +31,7 @@ def setup_driver(dir):
     # Build path from project root
     DOWNLOAD_DIR = os.path.join(project_root, "data", "raw", dir)    
     
-    chromedriver_path = os.path.join(project_root, "back-end", "data_collection", "chromedriver-win64", "chromedriver.exe")
+    chromedriver_path = os.path.join(project_root, "backend", "data_collection", "chromedriver-win64", "chromedriver.exe")
 
     service = Service(chromedriver_path)
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
@@ -53,6 +55,9 @@ def download_single_case(row_data, download_dir, download_url):
         doc_id, nombor_kes = row_data
         
         download_url = download_url.format(doc_id=doc_id)
+        
+        # Add delay before each download
+        time.sleep(random.uniform(1, 3))  # Random delay 1-3 seconds
         
         # Use requests for faster download
         response = requests.get(download_url, timeout=30, stream=True)

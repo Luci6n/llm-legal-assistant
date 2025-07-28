@@ -1,4 +1,4 @@
-from .. import *
+from data_collection import *
 
 def scrape_legal_cases():
     driver, wait, download_dir = setup_driver("legal_cases")
@@ -11,15 +11,18 @@ def scrape_legal_cases():
     current_page = 1
     
     try:
+        print("Starting Malaysian Court Case Scraper")
         driver.get("https://ejudgment.kehakiman.gov.my/ejudgmentweb/searchpage.aspx?JurisdictionType=ALL")
 
         # Wait for date controls to load
+        print("Waiting for page elements to load...")
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-id='divEJudgmentPortalSearchPageControl']")))
 
         # Click "Jenis Kes" dropdown and select "Sivil"
+        print("Setting case type to 'Sivil'...")
         jenis_kes = driver.find_element(By.XPATH, "//span[@data-type='ddlCaseType']")
         jenis_kes.click()
-        time.sleep(1)
+        time.sleep(2)
         driver.find_element(By.XPATH, "//li[contains(text(), 'Sivil')]").click()
 
         """
@@ -39,18 +42,24 @@ def scrape_legal_cases():
         to_picker.send_keys("31 Dis 2024")
         """
 
-        time.sleep(1)
+        time.sleep(3)
 
         # Click the search button
         search_button = driver.find_element(By.XPATH, "//input[@data-type='btnSearch']")
         search_button.click()
+        
+        # Wait for search results to load with better error handling
+        print("Waiting for search results...")
+        time.sleep(random.uniform(50, 60))  # Initial wait for search to process
 
         # Get the total number of pages
         total_pages_element = driver.find_element(By.XPATH, "//span[@data-type='TotalPage']")
         total_pages = int(total_pages_element.get_attribute("data-totalpage"))
-        
+        print(f"Found {total_pages} total pages to process")
+
         while current_page <= total_pages:
-            time.sleep(60)  # Wait for the page to load
+            print(f"Processing page {current_page} of {total_pages}")
+            time.sleep(random.uniform(20, 30))  # Wait for the page to load
             rows = driver.find_elements(By.CSS_SELECTOR, "table[data-id='tblAPList'] > tbody > tr")
         
             if len(rows) == 1 and "NoRecordFound" in rows[0].get_attribute("innerHTML"):
@@ -123,7 +132,7 @@ def scrape_legal_cases():
                     download_tasks, 
                     download_dir,
                     download_url="https://efs.kehakiman.gov.my/EFSWeb/DocDownloader.aspx?DocumentID={doc_id}&Inline=true", 
-                    max_workers=4
+                    max_workers=2
                 )
                 print(f"Downloaded {successful_downloads}/{len(download_tasks)} files from page {current_page}")
                 total_downloaded += successful_downloads
@@ -143,6 +152,8 @@ def scrape_legal_cases():
 
     except Exception as e:
         print(f"<X> Error: {e}")
+        import traceback
+        traceback.print_exc()
     finally:
         print("All file downloaded successfully")
         print(f"Total files: {total_downloaded}")
