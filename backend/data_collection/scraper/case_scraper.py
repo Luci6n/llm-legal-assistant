@@ -1,10 +1,11 @@
 from data_collection import *
 
 def scrape_legal_cases():
-    driver, wait, download_dir = setup_driver("legal_cases")
+    driver, wait, download_dir, metadata_dir = setup_driver("legal_cases")
     
-    # Set to track processed cases and avoid duplicates
-    processed_cases = set()
+    # Track downloaded files with incremental naming
+    downloaded_files = {}  # {base_name: count}
+    current_file = 1 # Start file numbering from 1
     
     # Initialize counters
     total_downloaded = 0
@@ -50,7 +51,7 @@ def scrape_legal_cases():
         
         # Wait for search results to load with better error handling
         print("Waiting for search results...")
-        time.sleep(random.uniform(50, 60))  # Initial wait for search to process
+        time.sleep(120)  # Initial wait for search to process
 
         # Get the total number of pages
         total_pages_element = driver.find_element(By.XPATH, "//span[@data-type='TotalPage']")
@@ -59,8 +60,18 @@ def scrape_legal_cases():
 
         while current_page <= total_pages:
             print(f"Processing page {current_page} of {total_pages}")
-            time.sleep(random.uniform(20, 30))  # Wait for the page to load
-            rows = driver.find_elements(By.CSS_SELECTOR, "table[data-id='tblAPList'] > tbody > tr")
+            
+            # Delay between pages
+            if current_page > 1:
+                page_delay = random.uniform(60, 80)
+                print(f"⏱️ Waiting {page_delay:.1f} seconds...")
+                time.sleep(page_delay)
+            
+            try:
+                rows = driver.find_elements(By.CSS_SELECTOR, "table[data-id='tblAPList'] > tbody > tr")
+            except Exception as e:
+                print(f"⚠️ Error finding table rows: {e}")
+                break
         
             if len(rows) == 1 and "NoRecordFound" in rows[0].get_attribute("innerHTML"):
                 print("<X> No results found for the selected criteria.")
@@ -79,18 +90,36 @@ def scrape_legal_cases():
                     if len(columns) < 2:
                         print(f"<!> Skipping row {i+1}: insufficient columns ({len(columns)})")
                         continue
-
+                    
+                    # Extract metadata from all columns
+                    metadata = {
+                        "nombor_kes": columns[1].text.strip() if len(columns) > 1 else "",
+                        "pihak_pihak": columns[2].text.strip() if len(columns) > 2 else "",
+                        "kata_kunci": columns[3].text.strip() if len(columns) > 3 else "",
+                        "tarikh_keputusan": columns[4].text.strip() if len(columns) > 4 else "",
+                        "tarikh_ap_dimuat_naik": columns[5].text.strip() if len(columns) > 5 else "",
+                        "hakim_majistret": columns[6].text.strip() if len(columns) > 6 else "",
+                    }
+                    
                     raw_text = columns[1].text.strip()
                     
-                    # Check for duplicates based on raw_text
-                    if raw_text in processed_cases:
-                        print(f"<!> Skipping duplicate case: {raw_text}")
-                        continue
+                    # Create base filename from case text
+                    base_filename = re.sub(r"[\\/:*?\"<>|\n\r]+", "_", raw_text).replace(" ", "_")
                     
-                    # Add to processed cases set
-                    processed_cases.add(raw_text)
-                    
-                    nombor_kes = re.sub(r"[\\/:*?\"<>|\n\r]+", "_", raw_text).replace(" ", "_")
+                    # Generate unique filename with incremental suffix
+                    if base_filename in downloaded_files:
+                        downloaded_files[base_filename] += 1
+                        unique_filename = f"{base_filename}_{downloaded_files[base_filename]}"
+                        print(f"🔄 Duplicate found: {base_filename} -> {unique_filename}")
+                    else:
+                        downloaded_files[base_filename] = 0
+                        unique_filename = base_filename
+                        print(f"📝 New case: {unique_filename}")
+                        
+                    # Add unique filename and file numbering to metadata
+                    metadata["filename"] = f"{unique_filename}.pdf"
+                    metadata["case_file_number"] = current_file
+                    current_file += 1
 
                     # Find download button
                     view_btn = None
@@ -115,12 +144,12 @@ def scrape_legal_cases():
                     
                     # Check if the download button exists
                     if not view_btn:
-                        print(f"<Notice> Skipping row {i+1} (Nombor Kes: {nombor_kes}): No download link found.")
+                        print(f"<Notice> Skipping row {i+1} (Nombor Kes: {unique_filename}): No download link found.")
                         continue # Skip to the next row if no download button
 
                     # Get document ID for download
                     doc_id = view_btn.get_attribute("data-documentid")
-                    download_tasks.append((doc_id, nombor_kes))
+                    download_tasks.append((doc_id, unique_filename, metadata))
 
                 except Exception as e:
                     print(f"<!> Error processing row {i+1}: {e}")
@@ -131,6 +160,7 @@ def scrape_legal_cases():
                 successful_downloads = parallel_download(
                     download_tasks, 
                     download_dir,
+                    metadata_dir,
                     download_url="https://efs.kehakiman.gov.my/EFSWeb/DocDownloader.aspx?DocumentID={doc_id}&Inline=true", 
                     max_workers=2
                 )
@@ -157,7 +187,15 @@ def scrape_legal_cases():
     finally:
         print("All file downloaded successfully")
         print(f"Total files: {total_downloaded}")
-        print(f"Total unique cases processed: {len(processed_cases)}")
+        print(f"Total unique cases processed: {len(downloaded_files)}")
+        
+        # Show duplicate statistics
+        duplicates = {k: v for k, v in downloaded_files.items() if v > 0}
+        if duplicates:
+            print("🔄 Duplicate file statistics:")
+            for base_name, count in duplicates.items():
+                print(f"   {base_name}: {count + 1} versions")
+                
         driver.quit()
 
 if __name__ == "__main__":
