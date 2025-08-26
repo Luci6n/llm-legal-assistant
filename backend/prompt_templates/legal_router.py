@@ -1,0 +1,3 @@
+LEGAL_ROUTER_TEMPLATE = """
+
+"""

@@ -1,11 +1,8 @@
 langchain
 langchain_experimental
 langgraph
-langchain_google_genai # temp
 langchain-openai
-langchain_voyageai
 python-dotenv  # load_dotenv comes from python-dotenv package
-langchain_google_genai
 tiktoken
 sentence-transformers
 pymupdf
@@ -19,3 +16,4 @@ rank_bm25
 ollama
 selenium
 requests
+docling

@@ -1,0 +1,8 @@
+from .legal_research_prompt import LEGAL_RESEARCH_PROMPT
+from .legal_summarization_prompt import CASE_SUMMARY_PROMPT
+from .legal_case_prediction_prompt import OUTCOME_PREDICTION_PROMPT
+from .metadata_extractor_prompt import METADATA_EXTRACTION_PROMPT
+from .sensitive_information_redact_prompt import SENSITIVE_INFORMATION_REDACT_PROMPT
+from .legal_router import LEGAL_ROUTER_PROMPT
+
+legal_task_prompts = [LEGAL_RESEARCH_PROMPT, CASE_SUMMARY_PROMPT, OUTCOME_PREDICTION_PROMPT, LEGAL_ROUTER_PROMPT]
