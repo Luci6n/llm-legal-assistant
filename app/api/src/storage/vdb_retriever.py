@@ -26,7 +26,6 @@ from llama_index.core.retrievers import QueryFusionRetriever
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 class HybridVDBRetriever:
     """
     A hybrid retriever that combines vector similarity search with BM25 keyword search.
@@ -36,11 +35,11 @@ class HybridVDBRetriever:
         self,
         embed_model_name: str = "BAAI/bge-m3",
         rerank_model_name: str = "BAAI/bge-reranker-large",
-        chroma_path: str = "./prototype_fyp1",
+        chroma_path: str = "./legal_cases", # "./legal_cases" or "./data/legislation"
         collection_name: str = "fyp1",
-        device: Optional[str] = None,
-        top_n_rerank: int = 20,
-        similarity_top_k: int = 10
+        device: "cuda" | "cpu" | None = None,
+        top_n_rerank: int = 40,
+        similarity_top_k: int = 100
     ):
         """
         Initialize the hybrid retriever.
