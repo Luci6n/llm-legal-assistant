@@ -6,7 +6,6 @@ python-dotenv  # load_dotenv comes from python-dotenv package
 tiktoken
 sentence-transformers
 pymupdf
-langchain_pymupdf4llm
 langchain-community
 playwright
 lxml
