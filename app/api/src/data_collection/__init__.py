@@ -1,16 +1,17 @@
+import os
+import re
+import time
+import random
+import json
+import requests
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import time
-import os
-import re
-import requests
-import random
-import json
+from webdriver_manager.chrome import ChromeDriverManager
 
 __all__ = [
     'setup_driver',
@@ -29,19 +30,22 @@ def setup_driver(dir):
     # --- Configuration ---
     # Get project root directory reliably
     current_file = os.path.abspath(__file__)  # Current file location
-    project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_file)))  # Go up 3 levels
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(current_file))))) # Go up 4 levels
     
     # Build path from project root
     DOWNLOAD_DIR = os.path.join(project_root, "data", "raw", dir)
     METADATA_DIR = os.path.join(DOWNLOAD_DIR, "metadata")    
     
-    chromedriver_path = os.path.join(project_root, "backend", "data_collection", "chromedriver-win64", "chromedriver.exe")
+    # chromedriver_path = os.path.join(project_root, "app", "api", "src", "data_collection", "chromedriver-win64", "chromedriver.exe")
 
-    service = Service(chromedriver_path)
+    service = Service(ChromeDriverManager().install())
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+    if dir == "legal_cases":
+        os.makedirs(METADATA_DIR, exist_ok=True)
     
     options = Options()
     options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
     options.add_argument("--window-size=1920,1080")
     options.add_experimental_option("prefs", {
         "download.default_directory": DOWNLOAD_DIR,
