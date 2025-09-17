@@ -1,65 +1,129 @@
+"""
+Core Web Search functionality - Framework agnostic
+"""
 from typing import Optional, Dict, Any
+from pydantic import BaseModel, Field
 from langchain_community.utilities import GoogleSerperAPIWrapper
 from dotenv import load_dotenv
 import os
 import logging
-import asyncio
 
 logger = logging.getLogger(__name__)
 
-class WebSearch:
-    def __init__(self, api_key: str):
-        load_dotenv()
-        if not api_key:
-            raise ValueError("API key cannot be empty")
-        self.search = GoogleSerperAPIWrapper(serper_api_key=api_key or os.getenv("SERPER_API_KEY"))
-        
-    async def run_search(self, query: str, num_results: int = 10) -> str:
+class WebSearchCore:
+    """
+    Core web search functionality using Google Serper API.
+    Framework-agnostic implementation.
+    """
+    
+    def __init__(self, api_key: Optional[str] = None, k: int = 20):
         """
-        Execute a web search query asynchronously.
+        Initialize web search with API key.
+        
+        Args:
+            api_key: Serper API key (optional, can use .env)
+            k: Number of results to return
+        """
+        load_dotenv()
+        api_key = api_key or os.getenv("SERPER_API_KEY")
+        if not api_key:
+            raise ValueError("SERPER_API_KEY is required")
+        
+        self._search = GoogleSerperAPIWrapper(serper_api_key=api_key, k=k)
+        self.k = k
+    
+    def search(self, query: str) -> str:
+        """
+        Execute search and return formatted results.
         
         Args:
             query: Search query string
-            num_results: Number of results to return (default: 10)
             
         Returns:
-            Search results as string
-            
-        Raises:
-            ValueError: If query is empty
-            Exception: If search fails
+            Search results as formatted string
         """
         if not query or not query.strip():
             raise ValueError("Query cannot be empty")
-            
+        
         try:
             logger.info(f"Executing search query: {query}")
-            # Use arun for async execution
-            return await self.search.arun(query)
+            return self._search.run(query)
         except Exception as e:
-            logger.error(f"Search failed for query '{query}': {str(e)}")
+            logger.error(f"Search failed: {e}")
             raise
     
-    async def get_search_results(self, query: str, num_results: int = 10) -> Optional[Dict[str, Any]]:
+    async def asearch(self, query: str) -> str:
+        """
+        Execute async search and return formatted results.
+        
+        Args:
+            query: Search query string
+            
+        Returns:
+            Search results as formatted string
+        """
+        if not query or not query.strip():
+            raise ValueError("Query cannot be empty")
+        
+        try:
+            logger.info(f"Executing async search query: {query}")
+            return await self._search.arun(query)
+        except Exception as e:
+            logger.error(f"Async search failed: {e}")
+            raise
+    
+    def get_structured_results(self, query: str) -> Optional[Dict[str, Any]]:
+        """
+        Get structured search results.
+        
+        Args:
+            query: Search query string
+            
+        Returns:
+            Dictionary with search results or None if search fails
+        """
+        if not query or not query.strip():
+            raise ValueError("Query cannot be empty")
+        
+        try:
+            return self._search.results(query)
+        except Exception as e:
+            logger.error(f"Failed to get structured results: {e}")
+            return None
+    
+    async def aget_structured_results(self, query: str) -> Optional[Dict[str, Any]]:
         """
         Get structured search results asynchronously.
         
         Args:
             query: Search query string
-            num_results: Number of results to return (default: 10)
-        
+            
         Returns:
             Dictionary with search results or None if search fails
-            
-        Raises:
-            ValueError: If query is empty
         """
         if not query or not query.strip():
             raise ValueError("Query cannot be empty")
         
         try:
-            # Use aresults for async execution
-            return await self.search.aresults(query)
+            return await self._search.aresults(query)
         except Exception as e:
-            logger.error(f"Failed to get structured results: {str(e)}")
+            logger.error(f"Failed to get structured results: {e}")
             return None
+
+# Alias for backward compatibility
+WebSearch = WebSearchCore
+
+def main():
+    """Demo function"""
+    search = WebSearchCore()
+    
+    # Test sync search
+    try:
+        query = "Latest AI research news"
+        result = search.search(query)
+        print("Search result:", result[:500], "...")
+    except Exception as e:
+        print("Search failed:", e)
+
+if __name__ == "__main__":
+    main()
