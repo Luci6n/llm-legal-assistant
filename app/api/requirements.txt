@@ -1,4 +1,4 @@
-langchain
+langchain==0.3.27
 langchain_experimental
 langgraph
 langchain-openai
@@ -6,7 +6,7 @@ python-dotenv  # load_dotenv comes from python-dotenv package
 tiktoken
 sentence-transformers
 pymupdf
-langchain-community
+langchain-community==0.3.29
 playwright
 lxml
 gradio
