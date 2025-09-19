@@ -65,14 +65,6 @@ def parse_row(category, row):
 
     return metadata, pdf_url
 
-CATEGORY_URLS = {
-    "act/principal/updated": PRINCIPAL_UPDATED_ACT_URL,
-    "act/principal/revised": PRINCIPAL_REVISED_ACT_URL,
-    "act/amendment": AMENDMENT_ACT_URL,
-    "ordinance": ORDINANCE_URL,
-    "subsidiary_legislation": SUBSIDIARY_LEGISLATION_URL,
-}
-
 def set_page_length_to_100(driver, wait, category):
     """
     Set the page length dropdown to 100 entries per page
