@@ -1,0 +1,62 @@
+{
+  "apiConfig": {
+    "baseUrl": "http://localhost:8000/api/v1",
+    "endpoints": {
+      "chats": "/chats",
+      "upload": "/upload",
+      "history": "/chats/history",
+      "messages": "/chats/{chatId}/messages",
+      "newChat": "/chats/new"
+    }
+  },
+  "ui": {
+    "theme": {
+      "name": "claude-dark",
+      "colors": {
+        "background": "#292A2D",
+        "surface": "#1C1D20",
+        "text": "#D9D9D6",
+        "subtle": "#8E8E8A",
+        "border": "#3B3B3B",
+        "button": "#383838",
+        "buttonHover": "#4A4A4A",
+        "primary": "#C2936E"
+      }
+    },
+    "sidebar": {
+      "expandedWidth": "256px",
+      "collapsedWidth": "64px",
+      "animationDuration": "0.3s"
+    },
+    "chat": {
+      "maxFileSize": "10MB",
+      "allowedFileTypes": [".pdf", ".doc", ".docx", ".txt", ".png", ".jpg", ".jpeg"],
+      "maxMessagesPerPage": 50,
+      "typingIndicatorDelay": 500
+    }
+  },
+  "features": {
+    "fileUpload": true,
+    "chatHistory": true,
+    "streamingResponses": true,
+    "keyboardShortcuts": true,
+    "darkMode": true,
+    "mobileSupport": true
+  },
+  "text": {
+    "appName": "Intelligent Legal Assistant (ILA)",
+    "welcomeMessage": "Your personal legal assistant for navigating the complexities of Malaysian Civil Cases. Enter your legal query below to begin.",
+    "placeholderText": "Enter your legal query here...",
+    "statusMessages": {
+      "analyzing": "Analyzing your legal query...",
+      "thinking": "Thinking...",
+      "uploading": "Uploading file...",
+      "connecting": "Connecting to server..."
+    },
+    "errorMessages": {
+      "uploadFailed": "Failed to upload file",
+      "connectionError": "Sorry, I couldn't connect to the server. Please check your connection and try again.",
+      "serverError": "Sorry, I encountered an error processing your request. Please try again."
+    }
+  }
+}

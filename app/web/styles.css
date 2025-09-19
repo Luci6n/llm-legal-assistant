@@ -1,0 +1,131 @@
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Base styles */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1C1D20; 
+}
+
+::-webkit-scrollbar-thumb {
+    background: #4A4A4A;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #5E5E5E;
+}
+
+/* Material icons styling */
+.material-symbols-outlined {
+    font-variation-settings:
+    'FILL' 0,
+    'wght' 300,
+    'GRAD' 0,
+    'opsz' 24
+}
+
+/* Sidebar Animation Styles */
+.sidebar-transition {
+    transition: all 0.3s ease-in-out;
+}
+
+.sidebar-expanded {
+    width: 256px;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.sidebar-collapsed {
+    width: 64px;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.sidebar-hidden {
+    width: 0;
+    opacity: 0;
+    transform: translateX(-100%);
+}
+
+/* Main content transition */
+.main-content-transition {
+    transition: margin-left 0.3s ease-in-out;
+}
+
+.main-expanded {
+    margin-left: 256px;
+}
+
+.main-collapsed {
+    margin-left: 64px;
+}
+
+.main-full {
+    margin-left: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 1024px) {
+    .sidebar-expanded {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        z-index: 50;
+    }
+    
+    .main-expanded, .main-collapsed {
+        margin-left: 0;
+    }
+}
+
+/* Additional UI enhancements */
+.chat-message {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hover effects */
+.sidebar-item:hover {
+    transform: translateX(2px);
+    transition: transform 0.2s ease-in-out;
+}
+
+/* Focus states for accessibility */
+.focus-ring:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(194, 147, 110, 0.5);
+}
+
+/* Loading states */
+.loading-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
