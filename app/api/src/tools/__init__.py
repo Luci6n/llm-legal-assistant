@@ -12,7 +12,7 @@ except ImportError:
 try:
     from .tools_manager import (
         LegalToolsManager,
-        LegalVectorSearchTool,
+        VectorSearchTool,
         CombinedSearchTool,
         create_legal_tools,
         create_vector_search_tool
@@ -30,7 +30,7 @@ if WEB_SEARCH_AVAILABLE:
 if TOOLS_MANAGER_AVAILABLE:
     __all__.extend([
         "LegalToolsManager",
-        "LegalVectorSearchTool", 
+        "VectorSearchTool", 
         "CombinedSearchTool",
         "create_legal_tools",
         "create_vector_search_tool"
