@@ -15,8 +15,6 @@ from .db_config import db_config
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core import Settings, VectorStoreIndex, Document
 from llama_index.postprocessor.flag_embedding_reranker import FlagEmbeddingReranker
-from llama_index.core.node_parser import SemanticSplitterNodeParser
-from llama_index.core.ingestion import IngestionPipeline
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.core.query_engine import RetrieverQueryEngine
@@ -82,29 +80,60 @@ class HybridVDBRetriever:
         self.hybrid_retriever = None
         self.query_engine = None
         
+        # If collection already has documents, initialize retrievers
+        if self.collection.count() > 0:
+            self._initialize_retrievers_for_existing_collection()
+        
         logger.info(f"HybridVDBRetriever initialized on {self.device}")
     
     def _initialize_models(self, embed_model_name: str, rerank_model_name: str, top_n_rerank: int):
-        """Initialize embedding and reranking models."""
+        """Initialize embedding and reranking models with fallback for memory issues."""
+        
+        # List of embedding models to try (from larger to smaller)
+        embedding_models = [
+            embed_model_name,  # Original model (BAAI/bge-m3)
+            "BAAI/bge-small-en-v1.5",  # Smaller fallback
+            "sentence-transformers/all-MiniLM-L6-v2",  # Even smaller
+        ]
+        
+        self.embed_model = None
+        for model_name in embedding_models:
+            try:
+                logger.info(f"Attempting to load embedding model: {model_name}")
+                self.embed_model = HuggingFaceEmbedding(
+                    model_name=model_name,
+                    device=self.device
+                )
+                logger.info(f"Successfully loaded embedding model: {model_name}")
+                break
+                
+            except Exception as e:
+                logger.warning(f"Failed to load {model_name}: {e}")
+                if "paging file" in str(e).lower() or "memory" in str(e).lower():
+                    logger.info(f"Memory issue detected, trying smaller model...")
+                    continue
+                else:
+                    raise e
+        
+        if self.embed_model is None:
+            raise RuntimeError("Failed to load any embedding model - insufficient memory")
+        
+        # Try to initialize reranker with fallback
         try:
-            self.embed_model = HuggingFaceEmbedding(
-                model_name=embed_model_name,
-                device=self.device
-            )
-            
             self.reranker = FlagEmbeddingReranker(
                 model=rerank_model_name,
                 top_n=top_n_rerank
             )
-            
-            # Set global embedding model
-            Settings.embed_model = self.embed_model
-            
-            logger.info("Embedding model and reranker initialized successfully")
-            
+            logger.info(f"Successfully loaded reranker: {rerank_model_name}")
         except Exception as e:
-            logger.error(f"Failed to initialize models: {e}")
-            raise
+            logger.warning(f"Failed to load reranker {rerank_model_name}: {e}")
+            logger.info("Continuing without reranker - search will still work")
+            self.reranker = None
+        
+        # Set global embedding model
+        Settings.embed_model = self.embed_model
+        
+        logger.info("Embedding model initialization completed")
     
     def _initialize_vector_store(self):
         """Initialize ChromaDB vector store using configuration."""
@@ -138,43 +167,6 @@ class HybridVDBRetriever:
             
         except Exception as e:
             logger.error(f"Failed to initialize vector store: {e}")
-            raise
-    
-    def _create_ingestion_pipeline(self) -> IngestionPipeline:
-        """Create the ingestion pipeline with semantic splitting."""
-        splitter = SemanticSplitterNodeParser(
-            buffer_size=1,
-            breakpoint_percentile_threshold=95,
-            embed_model=self.embed_model
-        )
-        
-        return IngestionPipeline(
-            transformations=[splitter, self.embed_model],
-            vector_store=self.vector_store,
-        )
-    
-    def ingest_documents(self, documents: List[Document]) -> None:
-        """
-        Ingest documents into the vector store and prepare retrievers.
-        
-        Args:
-            documents: List of Document objects to ingest
-        """
-        if not documents:
-            logger.warning("No documents provided for ingestion")
-            return
-        
-        try:
-            # Run ingestion pipeline
-            pipeline = self._create_ingestion_pipeline()
-            pipeline.run(documents=documents)
-            logger.info(f"Ingested {len(documents)} documents successfully")
-            
-            # Create index and retrievers
-            self._setup_retrievers(documents)
-            
-        except Exception as e:
-            logger.error(f"Failed to ingest documents: {e}")
             raise
     
     def _setup_retrievers(self, documents: List[Document]) -> None:
@@ -244,8 +236,16 @@ class HybridVDBRetriever:
         Returns:
             List of retrieved nodes
         """
-        if retriever_type == "hybrid" and self.hybrid_retriever:
-            return self.hybrid_retriever.retrieve(query_text)
+        if retriever_type == "hybrid":
+            if self.hybrid_retriever:
+                return self.hybrid_retriever.retrieve(query_text)
+            elif self.vector_retriever:
+                # Fallback to vector search if hybrid not available
+                logger.debug("Hybrid retriever not available, falling back to vector search")
+                return self.vector_retriever.retrieve(query_text)
+            else:
+                raise ValueError("No retriever available for hybrid search")
+                
         elif retriever_type == "vector" and self.vector_retriever:
             return self.vector_retriever.retrieve(query_text)
         elif retriever_type == "bm25" and self.bm25_retriever:
@@ -283,11 +283,103 @@ class HybridVDBRetriever:
             self.hybrid_retriever = None
             self.query_engine = None
             
+            # If collection has existing documents, initialize retrievers
+            if self.collection.count() > 0:
+                self._initialize_retrievers_for_existing_collection()
+            
             logger.info(f"Switched to collection: {self.collection_name} (type: {collection_type})")
             
         except Exception as e:
             logger.error(f"Failed to switch collection: {e}")
             raise
+    
+    def _initialize_retrievers_for_existing_collection(self):
+        """Initialize retrievers for a collection that already has documents."""
+        try:
+            # Create vector index from existing vector store
+            self.index = VectorStoreIndex.from_vector_store(self.vector_store)
+            
+            # Create vector retriever
+            self.vector_retriever = VectorIndexRetriever(
+                index=self.index,
+                similarity_top_k=self.similarity_top_k
+            )
+            
+            # For BM25, we need to rebuild from the documents in the collection
+            # Get all documents from the collection
+            all_results = self.collection.get()
+            
+            if all_results and all_results.get('documents'):
+                # Create Document objects from the stored content
+                documents = []
+                for i, doc_content in enumerate(all_results['documents']):
+                    if doc_content and doc_content.strip():  # Only add non-empty documents with content
+                        doc_id = all_results['ids'][i] if all_results.get('ids') else f"doc_{i}"
+                        metadata = all_results['metadatas'][i] if all_results.get('metadatas') else {}
+                        documents.append(Document(
+                            text=doc_content.strip(),
+                            doc_id=doc_id,
+                            metadata=metadata
+                        ))
+                
+                # Create BM25 retriever only if we have valid documents
+                if documents:
+                    try:
+                        self.bm25_retriever = BM25Retriever.from_defaults(
+                            docstore=self.index.docstore,
+                            similarity_top_k=self.similarity_top_k
+                        )
+                        
+                        # Create hybrid retriever
+                        self.hybrid_retriever = QueryFusionRetriever(
+                            retrievers=[self.vector_retriever, self.bm25_retriever],
+                            similarity_top_k=self.similarity_top_k,
+                            num_queries=1,
+                        )
+                        
+                        # Create query engine with reranking if available
+                        node_postprocessors = [self.reranker] if self.reranker else []
+                        self.query_engine = RetrieverQueryEngine(
+                            retriever=self.hybrid_retriever,
+                            node_postprocessors=node_postprocessors
+                        )
+                        
+                        logger.info(f"Hybrid retriever initialized for existing collection with {len(documents)} documents")
+                        return
+                        
+                    except Exception as bm25_error:
+                        logger.warning(f"BM25 initialization failed: {bm25_error}")
+                        logger.info("Falling back to vector-only retriever")
+                
+                # Fallback to vector-only if BM25 fails or no valid documents
+                node_postprocessors = [self.reranker] if self.reranker else []
+                self.query_engine = RetrieverQueryEngine(
+                    retriever=self.vector_retriever,
+                    node_postprocessors=node_postprocessors
+                )
+                logger.info("Initialized vector-only retriever for existing collection")
+                
+            else:
+                logger.warning("Collection appears empty - no documents to initialize retrievers with")
+                
+        except Exception as e:
+            logger.error(f"Failed to initialize retrievers for existing collection: {e}")
+            # Fall back to vector-only retriever
+            try:
+                self.index = VectorStoreIndex.from_vector_store(self.vector_store)
+                self.vector_retriever = VectorIndexRetriever(
+                    index=self.index,
+                    similarity_top_k=self.similarity_top_k
+                )
+                node_postprocessors = [self.reranker] if self.reranker else []
+                self.query_engine = RetrieverQueryEngine(
+                    retriever=self.vector_retriever,
+                    node_postprocessors=node_postprocessors
+                )
+                logger.info("Initialized vector-only retriever as fallback")
+            except Exception as fallback_error:
+                logger.error(f"Even fallback initialization failed: {fallback_error}")
+                raise
     
     def get_collection_info(self) -> dict:
         """

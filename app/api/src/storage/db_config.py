@@ -86,7 +86,7 @@ class ChromaDBConfig:
     
     @property
     def persist_directory(self) -> Optional[str]:
-        return os.getenv("CHROMA_PERSIST_DIR", "./chroma_db")
+        return os.getenv("CHROMA_PERSIST_DIR", "./vector_db")
     
     @property
     def client_settings(self) -> dict:
