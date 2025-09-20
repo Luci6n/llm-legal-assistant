@@ -1,3 +1,0 @@
-CASE_SUMMARY_PROMPT = """
-
-"""
