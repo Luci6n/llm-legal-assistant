@@ -1,18 +1,11 @@
 """
 Memory module for the legal assistant.
-Provides short-term and long-term memory capabilities with BGE-M3 embeddings and Chroma vector storage.
+Provides short-term memory capabilities using LangGraph summarization.
 """
 
-from .short_term_memory import ShortTermMemory, ConversationTurn, SessionContext
-from .long_term_memory import LongTermMemory, UserProfile, UserInteraction
-from .memory_manager import MemoryManager
+from .memory import MemoryManager, create_memory_manager
 
 __all__ = [
-    "ShortTermMemory",
-    "LongTermMemory", 
     "MemoryManager",
-    "ConversationTurn",
-    "SessionContext",
-    "UserProfile",
-    "UserInteraction"
+    "create_memory_manager"
 ]
