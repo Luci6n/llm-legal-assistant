@@ -1,190 +1,233 @@
-# Legal Assistant Chat Interface
+# Malaysian Civil Law Legal Assistant - Web Interface
 
-A modern, responsive chat interface for the Intelligent Legal Assistant (ILA) designed for Malaysian Civil Cases.
+A professional Gradio-based web interface for the multi-agent legal assistant system specializing in Malaysian Civil Law.
 
-## 📁 File Structure
+## 🌟 Features
 
+### Multi-Agent Architecture
+- **🔬 Legal Research Agent**: Specialized in Malaysian Civil Law research and case law analysis
+- **📄 Summarization Agent**: Expert in legal document summarization and key point extraction
+- **⚖️ Case Prediction Agent**: Analyzes scenarios and predicts legal outcomes
+- **🎯 Supervisor Agent**: Intelligently routes queries to the most appropriate specialist
+
+### User Interface Features
+- **💬 Interactive Chat Interface**: Clean, professional chat interface for legal queries
+- **🔄 Real-time Processing**: Optional streaming mode to see agent processing in real-time
+- **📚 Session Management**: Persistent conversation history per user session
+- **⚙️ Model Selection**: Support for multiple AI models (OpenAI, Anthropic)
+- **📱 Responsive Design**: Works on desktop, tablet, and mobile devices
+
+### Legal Specializations
+- Contract Law analysis and formation requirements
+- Negligence and tort law elements
+- Legal document summarization
+- Case outcome prediction
+- Malaysian Civil Law research
+
+## 🚀 Quick Start
+
+### Prerequisites
+1. Python 3.10 or higher
+2. Required environment variables:
+   - `OPENAI_API_KEY` (for OpenAI models)
+   - `ANTHROPIC_API_KEY` (for Anthropic models, optional)
+
+### Installation
+
+1. **Install Web Interface Dependencies**:
+   ```bash
+   cd app/web
+   pip install -r requirements.txt
+   ```
+
+2. **Launch the Interface**:
+   ```bash
+   python launch.py
+   ```
+
+3. **Access the Interface**:
+   Open your browser and navigate to: `http://127.0.0.1:7860`
+
+## 📖 Usage Guide
+
+### Getting Started
+
+1. **Initialize the System**:
+   - Select your preferred AI model from the dropdown
+   - Click "🚀 Initialize System"
+   - Wait for the success message
+
+2. **Ask Legal Questions**:
+   - Enter your User ID (optional, for session tracking)
+   - Type your legal question in the query box
+   - Click "📨 Submit Query" or press Enter
+
+3. **View Responses**:
+   - The system will automatically route your query to the appropriate specialist
+   - Responses appear in the main response area
+   - Enable streaming to see real-time processing updates
+
+### Example Queries
+
+#### Legal Research
+```
+What are the requirements for establishing a valid contract under Malaysian law?
+```
+
+#### Document Summarization
+```
+Please summarize this judgment: [paste legal text here]
+```
+
+#### Case Prediction
+```
+What's the likelihood of success in a negligence claim with these facts:
+- Driver was texting while driving
+- Accident occurred during heavy rain
+- Plaintiff suffered minor injuries
+- No traffic violations recorded
+```
+
+### Session Management
+
+- **View History**: Click "📖 Show Conversation History" to see past conversations
+- **Clear Session**: Click "🗑️ Clear Conversation" to start fresh
+- **User Sessions**: Each User ID maintains separate conversation history
+
+## 🔧 Configuration
+
+### Model Options
+- `openai:gpt-4o-mini` (Default, fast and cost-effective)
+- `openai:gpt-4o` (Most capable OpenAI model)
+- `openai:gpt-4` (Previous generation, reliable)
+- `openai:gpt-3.5-turbo` (Legacy, budget option)
+- `anthropic:claude-3-5-sonnet-latest` (Anthropic's most capable)
+- `anthropic:claude-3-5-haiku-latest` (Anthropic's fast model)
+
+### Environment Variables
+```bash
+# Required for OpenAI models
+export OPENAI_API_KEY="your-openai-api-key"
+
+# Optional for Anthropic models
+export ANTHROPIC_API_KEY="your-anthropic-api-key"
+
+# Optional: Custom database URL for persistent memory
+export DATABASE_URL="postgresql://user:pass@localhost/legal_assistant"
+```
+
+### Launch Options
+
+#### Development Mode (Default)
+```python
+launch_interface(
+    server_name="127.0.0.1",  # Local only
+    server_port=7860,
+    share=False,              # No public URL
+    debug=True               # Debug mode enabled
+)
+```
+
+#### Production Mode
+```python
+launch_interface(
+    server_name="0.0.0.0",    # Accept external connections
+    server_port=7860,
+    share=True,               # Create public Gradio URL
+    debug=False              # Production mode
+)
+```
+
+## 🏗️ Architecture
+
+### Interface Components
+
+1. **LegalAssistantInterface**: Main wrapper class
+   - Manages the legal agent system lifecycle
+   - Handles user sessions and conversation history
+   - Processes queries and formats responses
+
+2. **Gradio Interface**: Web UI components
+   - System configuration panel
+   - Chat interface with query input/response display
+   - Session management controls
+   - Example queries and documentation
+
+### Integration Points
+
+- **routing.py**: Multi-agent system integration via `create_legal_agent_system()`
+- **Memory Management**: Automatic session tracking and conversation persistence
+- **Error Handling**: Comprehensive error catching and user-friendly error messages
+
+## 🛠️ Development
+
+### File Structure
 ```
 app/web/
-├── index.html          # Main HTML file (clean, semantic structure)
-├── styles.css          # All CSS styles and animations
-├── script.js           # JavaScript application logic
-├── config.json         # Configuration settings
-├── README.md           # This documentation file
-└── chat_interface.html # Original monolithic file (backup)
+├── gradio_interface.py    # Main interface implementation
+├── launch.py             # Simple launcher script
+├── requirements.txt      # Web interface dependencies
+└── README.md            # This documentation
 ```
 
-## 🚀 Features
+### Customization
 
-- **Clean Architecture**: Separated HTML, CSS, and JavaScript for maintainability
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
-- **Smooth Animations**: Elegant sidebar transitions and UI interactions
-- **File Upload**: Support for documents and images with preview
-- **Real-time Chat**: Streaming responses with typing indicators
-- **Chat History**: Persistent conversation management
-- **Accessibility**: Keyboard navigation and focus management
-- **Modern UI**: Claude-inspired dark theme
-
-## 🎨 Styling (styles.css)
-
-### Key Features:
-- **Custom CSS variables** for easy theme customization
-- **Smooth transitions** for all interactive elements
-- **Responsive breakpoints** for mobile optimization
-- **Animation keyframes** for enhanced user experience
-- **Focus states** for accessibility compliance
-
-### CSS Organization:
-```css
-/* Base styles and fonts */
-/* Scrollbar styling */
-/* Material icons */
-/* Sidebar animations */
-/* Main content transitions */
-/* Mobile responsiveness */
-/* UI enhancements */
-/* Loading states */
+#### Adding New Model Providers
+```python
+self.model_options = [
+    "openai:gpt-4o-mini",
+    "anthropic:claude-3-5-sonnet-latest",
+    "your-provider:your-model"  # Add here
+]
 ```
 
-## 🔧 JavaScript (script.js)
+#### Custom CSS Styling
+Modify the `custom_css` variable in `create_interface()` method to customize appearance.
 
-### Architecture:
-- **Class-based structure** for better organization
-- **Modular methods** for specific functionality
-- **Event-driven design** for responsive interactions
-- **Async/await patterns** for API calls
-- **Error handling** throughout the application
+#### Additional Features
+- Add new buttons/controls in the Gradio interface
+- Extend the `LegalAssistantInterface` class with new methods
+- Integrate additional tools or APIs
 
-### Key Classes:
-```javascript
-class LegalAssistantChat {
-    constructor()           // Initialize the app
-    initializeElements()    // Setup DOM references
-    bindEvents()           // Attach event listeners
-    initialize()           // App startup logic
-    
-    // Sidebar management
-    closeSidebar()
-    openSidebar()
-    
-    // Chat functionality
-    loadChatHistory()
-    createNewChat()
-    sendMessage()
-    
-    // File handling
-    handleFileUpload()
-    uploadFile()
-    displayUploadedFile()
-    
-    // UI utilities
-    showStatus()
-    hideStatus()
-    autoResizeTextarea()
-}
-```
+## 🔍 Troubleshooting
 
-## ⚙️ Configuration (config.json)
+### Common Issues
 
-Centralized configuration for easy customization:
+1. **System Not Initializing**
+   - Check your API keys are set correctly
+   - Verify the selected model is available
+   - Check internet connectivity
 
-- **API endpoints** and base URL
-- **Theme colors** and UI settings
-- **Feature flags** for enabling/disabling functionality
-- **Text content** and error messages
-- **File upload** restrictions and settings
+2. **Import Errors**
+   - Ensure you're running from the correct directory
+   - Verify all dependencies are installed
+   - Check Python path configuration
 
-## 🎯 Usage
+3. **No Response from Agents**
+   - Verify the legal agent system is properly initialized
+   - Check for errors in the system status
+   - Try reinitializing with a different model
 
-### Basic Setup:
-1. Ensure all files are in the same directory
-2. Open `index.html` in a web browser
-3. The application will automatically initialize
+### Debug Mode
+Enable debug mode by setting `debug=True` in `launch_interface()` for detailed logging.
 
-### Development:
-```html
-<!-- Link to external files -->
-<link rel="stylesheet" href="styles.css">
-<script src="script.js"></script>
-```
+### Logs
+Check the console output for detailed error messages and system status updates.
 
-### Customization:
-1. **Colors**: Modify the Tailwind config in `index.html` or CSS variables in `styles.css`
-2. **API**: Update endpoints in `config.json`
-3. **Features**: Toggle functionality in the JavaScript configuration
-4. **Text**: Update all user-facing text in `config.json`
+## 📝 Legal Disclaimer
 
-## 📱 Responsive Design
-
-### Breakpoints:
-- **Desktop**: Full sidebar with content margin adjustment
-- **Tablet**: Collapsible sidebar with overlay
-- **Mobile**: Full-screen overlay sidebar
-
-### Mobile Features:
-- Touch-friendly buttons and inputs
-- Swipe gestures for sidebar
-- Optimized typography and spacing
-- Fixed positioning for optimal UX
-
-## 🔐 Security Considerations
-
-- **File upload validation** on both client and server
-- **XSS protection** with proper HTML escaping
-- **CSRF tokens** for API requests (implement server-side)
-- **Content Security Policy** headers recommended
-
-## 🚀 Performance
-
-### Optimizations:
-- **Lazy loading** for chat history
-- **Debounced input** for auto-resize functionality
-- **Efficient DOM manipulation** with minimal reflows
-- **CSS animations** using transform for GPU acceleration
-
-## 🧪 Testing
-
-### Browser Support:
-- Chrome 80+
-- Firefox 75+
-- Safari 13+
-- Edge 80+
-
-### Testing Checklist:
-- [ ] Sidebar toggle functionality
-- [ ] File upload and preview
-- [ ] Message sending and receiving
-- [ ] Responsive design on mobile
-- [ ] Keyboard navigation
-- [ ] Error handling scenarios
-
-## 🔧 Development Guidelines
-
-### Code Style:
-- Use **semantic HTML** elements
-- Follow **BEM methodology** for CSS classes
-- Implement **async/await** for all API calls
-- Add **JSDoc comments** for complex functions
-- Use **const/let** instead of var
-
-### Performance Tips:
-- Minimize DOM queries by caching elements
-- Use event delegation for dynamic content
-- Implement virtual scrolling for large chat histories
-- Optimize images and use WebP format when possible
-
-## 📄 License
-
-This project is part of the Legal Assistant application. All rights reserved.
+This system is designed to assist with legal research and analysis but should not be considered as legal advice. Always consult with qualified legal professionals for specific legal matters.
 
 ## 🤝 Contributing
 
-1. Follow the established file structure
-2. Maintain separation of concerns (HTML/CSS/JS)
-3. Test on multiple browsers and devices
-4. Update documentation for any new features
-5. Ensure accessibility compliance
+To contribute to the web interface:
 
----
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-**Note**: This separated structure makes the codebase much more maintainable and allows for easier debugging, testing, and collaboration.
+## 📄 License
+
+This project is part of the LLM Legal Assistant system. See the main repository for license information.
