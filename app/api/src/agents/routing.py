@@ -13,46 +13,35 @@ Uses LangGraph's create_react_agent and supervisor patterns for robust multi-age
 import logging
 import os
 import base64
-    # Force newlines before/after all section headers
-    text = re.sub(r'(#+ [^\n]+)', r'\n\1\n', text)
-    # Force newlines before all major fields
-    text = re.sub(r'(Disposition:)', r'\n**\1**', text)
-    text = re.sub(r'(Judgment Type:)', r'\n**\1**', text)
-    text = re.sub(r'(Remedy:)', r'\n**\1**', text)
-    text = re.sub(r'(Limitations)', r'\n**Limitations**', text)
-    # Ensure bullet points always start on new lines
-    text = re.sub(r'([^\n])(- [^\n])', r'\1\n\2', text)
-    # Ensure each field in Remedy is on its own line
-    text = re.sub(r'(Damages Awarded:)', r'\n- **\1**', text)
-    text = re.sub(r'(Type:)', r'\n  - \1', text)
-    text = re.sub(r'(Amount:)', r'\n  - \1', text)
-                             def enforce_markdown_structure(text):
-                                 import re
-                                 # Force newlines before/after all section headers
-                                 text = re.sub(r'(#+ [^\n]+)', r'\n\1\n', text)
-                                 # Force newlines before all major fields
-                                 text = re.sub(r'(Disposition:)', r'\n**\1**', text)
-                                 text = re.sub(r'(Judgment Type:)', r'\n**\1**', text)
-                                 text = re.sub(r'(Remedy:)', r'\n**\1**', text)
-                                 text = re.sub(r'(Limitations)', r'\n**Limitations**', text)
-                                 # Ensure bullet points always start on new lines
-                                 text = re.sub(r'([^\n])(- [^\n])', r'\1\n\2', text)
-                                 # Ensure each field in Remedy is on its own line
-                                 text = re.sub(r'(Damages Awarded:)', r'\n- **\1**', text)
-                                 text = re.sub(r'(Type:)', r'\n  - \1', text)
-                                 text = re.sub(r'(Amount:)', r'\n  - \1', text)
-                                 text = re.sub(r'(Currency:)', r'\n  - \1', text)
-                                 text = re.sub(r'(Injunction:)', r'\n- **\1**', text)
-                                 text = re.sub(r'(Declaratory Relief:)', r'\n- **\1**', text)
-                                 text = re.sub(r'(Specific Performance:)', r'\n- **\1**', text)
-                                 text = re.sub(r'(Costs Awarded:)', r'\n- **\1**', text)
-                                 text = re.sub(r'(Appeal Possibility:)', r'\n- **\1**', text)
-                                 # Ensure Limitations bullet points are on new lines
-                                 text = re.sub(r'(\*\*Limitations\*\*[\s\S]*?)(- )', lambda m: m.group(1).rstrip() + '\n' + m.group(2), text)
-                                 # Remove duplicate blank lines
-                                 text = re.sub(r'\n{3,}', '\n\n', text)
-                                 # Strip leading/trailing whitespace
-                                 return text.strip()
+import threading
+from typing import Dict, Any, List, Literal, Union
+from typing_extensions import TypedDict
+
+# Set CUDA memory allocation configuration to avoid fragmentation
+os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Core LangGraph and LangChain imports
+from langgraph.graph import StateGraph, START, END, MessagesState
+from langgraph.prebuilt import create_react_agent
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.types import Command
+from langchain.chat_models import init_chat_model
+from langchain_core.messages import HumanMessage
+
+# Try to import langgraph-supervisor for prebuilt supervisor functionality
+try:
+    from langgraph_supervisor import create_supervisor
+    SUPERVISOR_AVAILABLE = True
+    logger.info("langgraph-supervisor available")
+except ImportError:
+    logger.warning("langgraph-supervisor not available - using custom supervisor")
+    SUPERVISOR_AVAILABLE = False
+
+# Import our local modules
 from ..llm.api_based_model import LegalBasedModel
 from ..memory.memory import MemoryManager
 from ..tools.tools_manager import LegalToolsManager
@@ -795,34 +784,6 @@ class LegalAgentSystem:
                             'transfer_to_' not in content):
                             
                             # Clean up formatting issues in content
-                                def enforce_markdown_structure(text):
-                                    import re
-                                    # Force newlines before/after all section headers
-                                    text = re.sub(r'(#+ [^\n]+)', r'\n\1\n', text)
-                                    # Force newlines before all major fields
-                                    text = re.sub(r'(Disposition:)', r'\n**\1**', text)
-                                    text = re.sub(r'(Judgment Type:)', r'\n**\1**', text)
-                                    text = re.sub(r'(Remedy:)', r'\n**\1**', text)
-                                    text = re.sub(r'(Limitations)', r'\n**Limitations**', text)
-                                    # Ensure bullet points always start on new lines
-                                    text = re.sub(r'([^\n])(- [^\n])', r'\1\n\2', text)
-                                    # Ensure each field in Remedy is on its own line
-                                    text = re.sub(r'(Damages Awarded:)', r'\n- **\1**', text)
-                                    text = re.sub(r'(Type:)', r'\n  - \1', text)
-                                    text = re.sub(r'(Amount:)', r'\n  - \1', text)
-                                    text = re.sub(r'(Currency:)', r'\n  - \1', text)
-                                    text = re.sub(r'(Injunction:)', r'\n- **\1**', text)
-                                    text = re.sub(r'(Declaratory Relief:)', r'\n- **\1**', text)
-                                    text = re.sub(r'(Specific Performance:)', r'\n- **\1**', text)
-                                    text = re.sub(r'(Costs Awarded:)', r'\n- **\1**', text)
-                                    text = re.sub(r'(Appeal Possibility:)', r'\n- **\1**', text)
-                                    # Ensure Limitations bullet points are on new lines
-                                    text = re.sub(r'(\*\*Limitations\*\*[\s\S]*?)(- )', lambda m: m.group(1).rstrip() + '\n' + m.group(2), text)
-                                    # Remove duplicate blank lines
-                                    text = re.sub(r'\n{3,}', '\n\n', text)
-                                    # Strip leading/trailing whitespace
-                                    return text.strip()
-            
                             cleaned_content = content
                             
                             # Fix common formatting concatenation issues
