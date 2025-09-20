@@ -113,17 +113,17 @@ class WebSearchCore:
 # Alias for backward compatibility
 WebSearch = WebSearchCore
 
-def main():
-    """Demo function"""
-    search = WebSearchCore()
+# def main():
+#     """Demo function"""
+#     search = WebSearchCore()
     
-    # Test sync search
-    try:
-        query = "Latest AI research news"
-        result = search.search(query)
-        print("Search result:", result[:500], "...")
-    except Exception as e:
-        print("Search failed:", e)
+#     # Test sync search
+#     try:
+#         query = "Latest AI research news"
+#         result = search.search(query)
+#         print("Search result:", result[:500], "...")
+#     except Exception as e:
+#         print("Search failed:", e)
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

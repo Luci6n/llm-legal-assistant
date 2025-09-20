@@ -388,6 +388,11 @@ class LegalToolsManager:
         with self._instance_lock:
             self._instance_count += 1
         
+        # Force garbage collection before initializing to free memory
+        gc.collect()
+        if TORCH_AVAILABLE and torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        
         # Initialize vector search (shared or new)
         if force_new_instance or self._shared_vector_search is None:
             vector_config = vector_search_config or {}
