@@ -263,7 +263,7 @@ class CombinedSearchTool(BaseTool):
                     formatted_vector = self.vector_search.get_formatted_results(
                         results=vector_results,
                         include_scores=True,
-                        max_content_length=250
+                        max_content_length=2000
                     )
                     
                     results_parts.append(f"=== LEGAL DOCUMENTS SEARCH ===\n{formatted_vector}")
@@ -344,7 +344,7 @@ class CombinedSearchTool(BaseTool):
                             formatted_vector = self.vector_search.get_formatted_results(
                                 results=result,
                                 include_scores=True,
-                                max_content_length=250
+                                max_content_length=2000
                             )
                             results_parts.append(f"=== LEGAL DOCUMENTS SEARCH ===\n{formatted_vector}")
                         else:

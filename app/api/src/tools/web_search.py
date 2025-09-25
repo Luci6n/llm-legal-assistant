@@ -16,7 +16,7 @@ class WebSearchCore:
     Framework-agnostic implementation.
     """
     
-    def __init__(self, api_key: Optional[str] = None, k: int = 20):
+    def __init__(self, api_key: Optional[str] = None, k: int = 10):
         """
         Initialize web search with API key.
         
