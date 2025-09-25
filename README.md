@@ -1,4 +1,4 @@
-# Malaysian Civil Law Legal Assistant
+# Malaysian Civil Cases Legal Assistant - Final Year Project (FYP)
 
 A sophisticated multi-agent legal AI system specializing in Malaysian Civil Law, featuring intelligent routing, document processing, and comprehensive evaluation capabilities.
 
