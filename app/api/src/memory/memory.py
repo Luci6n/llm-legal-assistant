@@ -89,8 +89,8 @@ class MemoryManager:
         self.doc_summarizer = SummarizationNode(
             token_counter=count_tokens_approximately,
             model=summarizer_model,
-            max_tokens=4096,                # Each chunk up to ~4k tokens
-            max_summary_tokens=512,         # Compressed summary of each chunk
+            max_tokens=16384,               # Each chunk up to ~16k tokens - handle larger legal documents
+            max_summary_tokens=2048,        # Larger summaries retain more legal details
             output_messages_key="doc_summaries",
             name="document_summarizer"
         )
@@ -99,8 +99,8 @@ class MemoryManager:
         self.chat_summarizer = SummarizationNode(
             token_counter=count_tokens_approximately,
             model=summarizer_model,
-            max_tokens=1024,                # Shorter history window
-            max_summary_tokens=256,         # Compact rolling summary
+            max_tokens=8192,                # Longer history window
+            max_summary_tokens=1024,        # More detailed conversation summaries
             output_messages_key="chat_summary",
             name="chat_summarizer"
         )
