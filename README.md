@@ -1,12 +1,12 @@
 # Malaysian Civil Cases Legal Assistant - Final Year Project (FYP)
 
-A sophisticated multi-agent legal AI system specializing in Malaysian Civil Law, featuring intelligent routing, document processing, and comprehensive evaluation capabilities.
+A sophisticated multi-agent legal AI system specializing in Malaysian Civil Cases, featuring intelligent routing, document processing, and comprehensive evaluation capabilities.
 
 ## 🌟 Key Features
 
 ### Multi-Agent Architecture
 - **🎯 Supervisor Agent**: Intelligent routing system that delegates queries to specialized agents
-- **🔬 Legal Research Agent**: Expert in Malaysian Civil Law research and case law analysis
+- **🔬 Legal Research Agent**: Expert in Malaysian Civil Cases research and case law analysis
 - **📄 Summarization Agent**: Specialized in legal document summarization and key point extraction
 - **⚖️ Case Prediction Agent**: Analyzes legal scenarios and predicts potential outcomes
 
@@ -15,7 +15,7 @@ A sophisticated multi-agent legal AI system specializing in Malaysian Civil Law,
 - **📎 File Upload Support**: Process PDF, DOCX, TXT files and images with OCR
 - **🔄 Real-time Streaming**: See agent processing in real-time
 - **📚 Session Management**: Persistent conversation history per user
-- **⚙️ Model Selection**: Support for multiple AI models (OpenAI, Anthropic)
+- **⚙️ Model Selection**: Support for OpenAI models (other models coming soon!)
 
 ### Advanced Capabilities
 - **🇲🇾 Malaysian Civil Law Specialization**: Focused expertise in Malaysian legal system
@@ -58,7 +58,6 @@ A sophisticated multi-agent legal AI system specializing in Malaysian Civil Law,
 ### Prerequisites
 - Python 3.10 or higher
 - OpenAI API key (required)
-- Anthropic API key (optional)
 
 ### Installation
 
@@ -77,7 +76,6 @@ A sophisticated multi-agent legal AI system specializing in Malaysian Civil Law,
    Create a `.env` file in the project root:
    ```env
    OPENAI_API_KEY=your_openai_api_key_here
-   ANTHROPIC_API_KEY=your_anthropic_api_key_here  # Optional
    ```
 
 4. **Launch the Web Interface**:
@@ -92,7 +90,7 @@ A sophisticated multi-agent legal AI system specializing in Malaysian Civil Law,
 ## 📖 Usage Guide
 
 ### Basic Legal Queries
-Ask questions about Malaysian Civil Law:
+Ask questions about Malaysian Civil Cases:
 ```
 "What are the requirements for a valid contract under Malaysian law?"
 "How do Malaysian courts determine negligence in tort cases?"
@@ -122,9 +120,7 @@ Provide case scenarios for:
 ### Model Selection
 The system supports multiple AI models:
 - `openai:gpt-4.1` (recommended)
-- `openai:gpt-4o-mini` (faster, cost-effective)
-- `anthropic:claude-3-sonnet`
-- `anthropic:claude-3-haiku`
+- `openai:gpt-4.1-mini` (faster, cost-effective)
 
 ### Customization
 - Modify prompts in `app/api/src/prompt_templates/`
@@ -139,7 +135,6 @@ The project includes a comprehensive evaluation framework:
 - **Legal Summarization**: ROUGE/BLEU scores and LLM-as-Judge assessment
 - **Legal Research**: Precision/Recall metrics for information retrieval
 - **Case Prediction**: Classification accuracy and regression metrics
-- **System Performance**: Latency and throughput analysis
 
 ### Running Evaluations
 ```bash
@@ -251,7 +246,7 @@ logging.basicConfig(level=logging.DEBUG)
 ```
 
 ### Performance Optimization
-- Use `gpt-4o-mini` for faster responses
+- Use `gpt-4.1-mini` for faster responses
 - Implement caching for repeated queries
 - Optimize vector database indexing
 
