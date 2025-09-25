@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 # Global variables for the legal system
 legal_system = None
-current_model = "openai:gpt-4.1"
+current_model = "gpt-4.1"
 # Session management for memory persistence
 user_sessions = {}  # user_id -> session_id mapping
 
@@ -242,9 +242,9 @@ def create_legal_chat_interface():
     
     # Model options - corrected to use actual model names
     model_options = [
-        "openai:gpt-4.1",
-        "openai:gpt-4.1-mini", 
-        "openai:gpt-4.1-nano",
+        "gpt-4.1",
+        "gpt-4.1-mini", 
+        "gpt-4.1-nano",
     ]
     
     # Custom CSS for better styling
@@ -286,7 +286,7 @@ def create_legal_chat_interface():
             with gr.Column(scale=1):
                 model_dropdown = gr.Dropdown(
                     choices=model_options,
-                    value="openai:gpt-4.1",
+                    value="gpt-4.1",
                     label="🤖 AI Model",
                     info="Select the model for all agents"
                 )
@@ -338,7 +338,7 @@ def create_legal_chat_interface():
                 - **PDF**: Legal documents, cases, contracts
                 - **DOCX**: Word documents, legal drafts
                 - **TXT**: Plain text legal content
-                - **Images**: Screenshots of legal documents (OCR coming soon)
+                - **Images**: Screenshots of legal documents or any images
                 
                 ### 💡 Example Queries
                 
@@ -357,7 +357,7 @@ def create_legal_chat_interface():
         
         # Initialize system on startup
         interface.load(
-            fn=lambda: initialize_legal_system("openai:gpt-4.1"),
+            fn=lambda: initialize_legal_system("gpt-4.1"),
             outputs=None
         )
         
