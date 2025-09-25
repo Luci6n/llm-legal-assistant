@@ -110,18 +110,33 @@ class LegalAgentSystem:
     to specialized worker agents based on the type of legal query.
     """
     
-    def __init__(self, model_name: str = "openai:gpt-4o-mini"):
+    def __init__(self, model_name: str = "gpt-4.1"):
         """
         Initialize the multi-agent legal system.
         
         Args:
             model_name: The model to use for all agents
         """
+        # Remove openai: prefix if present for consistency
+        if model_name.startswith("openai:"):
+            model_name = model_name.replace("openai:", "")
+            
         self.model_name = model_name
         
-        # Initialize base model
-        self.model_manager = LegalBasedModel(model_name=model_name)
-        self.base_model = self.model_manager.get_model()
+        # Initialize models with agent-specific configurations
+        self.research_model_manager = LegalBasedModel(model_name=model_name, agent_type="research")
+        self.summarization_model_manager = LegalBasedModel(model_name=model_name, agent_type="summarization")
+        self.prediction_model_manager = LegalBasedModel(model_name=model_name, agent_type="prediction")
+        self.supervisor_model_manager = LegalBasedModel(model_name=model_name, agent_type="supervisor")
+        
+        # Get the models
+        self.research_model = self.research_model_manager.get_model()
+        self.summarization_model = self.summarization_model_manager.get_model()
+        self.prediction_model = self.prediction_model_manager.get_model()
+        self.supervisor_model = self.supervisor_model_manager.get_model()
+        
+        # Use research model as base model for backwards compatibility
+        self.base_model = self.research_model
         
         # Initialize memory manager
         self.memory_manager = MemoryManager(self.base_model)
@@ -183,6 +198,36 @@ class LegalAgentSystem:
         files = query_data.get('files', [])
         for file_info in files:
             try:
+                # Handle base64-encoded files (multimodal format)
+                if file_info.get('source_type') == 'base64':
+                    mime_type = file_info.get('mime_type', 'application/octet-stream')
+                    filename = file_info.get('filename', 'unknown')
+                    base64_data = file_info.get('data', '')
+                    
+                    # For PDF documents, use the native multimodal format for OpenAI
+                    if mime_type == 'application/pdf':
+                        content.append({
+                            "type": "file",
+                            "source_type": "base64",
+                            "data": base64_data,
+                            "mime_type": mime_type,
+                            "filename": filename
+                        })
+                        logger.info(f"Added PDF content as base64: {filename}")
+                    
+                    # For images, convert to image_url format
+                    elif mime_type.startswith('image/'):
+                        content.append({
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:{mime_type};base64,{base64_data}"
+                            }
+                        })
+                        logger.info(f"Added image content as base64: {filename}")
+                    
+                    continue
+                
+                # Handle file path-based files (existing format)
                 file_path = file_info.get('path') or file_info.get('name', '')
                 if not file_path or not os.path.exists(file_path):
                     continue
@@ -293,7 +338,7 @@ class LegalAgentSystem:
             logger.warning("Research agent initialized without search tools")
         
         return create_react_agent(
-            model=self.base_model,
+            model=self.research_model,  # Use research-specific model
             tools=all_tools,
             prompt=LEGAL_RESEARCH_PROMPT,
             name="legal_research_agent",
@@ -317,7 +362,7 @@ class LegalAgentSystem:
             all_tools = memory_tools
         
         return create_react_agent(
-            model=self.base_model,
+            model=self.summarization_model,  # Use summarization-specific model
             tools=all_tools,
             prompt=LEGAL_SUMMARIZATION_PROMPT,
             name="legal_summarization_agent", 
@@ -341,7 +386,7 @@ class LegalAgentSystem:
             all_tools = memory_tools
         
         return create_react_agent(
-            model=self.base_model,
+            model=self.prediction_model,  # Use prediction-specific model
             tools=all_tools,
             prompt=LEGAL_PREDICTION_PROMPT,
             name="legal_prediction_agent",
@@ -394,7 +439,7 @@ class LegalAgentSystem:
         ]
         
         return create_react_agent(
-            model=self.base_model,
+            model=self.supervisor_model,  # Use supervisor-specific model
             tools=handoff_tools,
             prompt=SUPERVISOR_PROMPT,
             name="supervisor_agent",
@@ -414,7 +459,7 @@ class LegalAgentSystem:
         try:
             # Use SUPERVISOR_PROMPT loaded from file
             supervisor = create_supervisor(
-                model=self.base_model,
+                model=self.supervisor_model,  # Use supervisor-specific model
                 agents=[
                     self.research_agent,
                     self.summarization_agent, 
@@ -891,7 +936,7 @@ class LegalAgentSystem:
             return []
 
 # Factory function for easy initialization
-def create_legal_agent_system(model_name: str = "openai:gpt-4o-mini") -> LegalAgentSystem:
+def create_legal_agent_system(model_name: str = "gpt-4.1") -> LegalAgentSystem:
     """
     Factory function to create a legal agent system.
     
