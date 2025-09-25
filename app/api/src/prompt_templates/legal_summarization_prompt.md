@@ -91,7 +91,7 @@ Where a tenant continues to occupy premises after the expiry of tenancy without 
 
 **Example Output (Statute)**
 
-**Summarized Document**  
+**Summarized Document**  <br>
 Section 28(4)(a) of the Civil Law Act 1956 provides that when a tenant unlawfully continues in possession after the expiry of tenancy, the landlord is entitled to recover double the rental for the duration of unlawful occupation. This provision serves as a deterrent against tenants holding over beyond the agreed term.  
 
 **Key Points**  
