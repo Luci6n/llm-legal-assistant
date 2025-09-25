@@ -1,0 +1,90 @@
+# Malaysian Civil Law Legal Assistant - Optimized Dependencies
+# Generated based on actual imports found in codebase
+
+# Core Framework Dependencies
+langchain==0.3.27
+langchain-experimental==0.4.1
+langgraph==0.6.7
+langchain-openai==0.3.32
+langchain-community==0.3.29
+langchain-core==0.3.76
+langchain-anthropic==0.3.20
+langchain-text-splitters==0.3.9
+langsmith==0.4.26
+langgraph-checkpoint==2.1.1
+langgraph-checkpoint-postgres==2.0.23
+langgraph-prebuilt==0.6.4
+langgraph-supervisor==0.0.29
+langmem==0.0.29
+
+# Language Models and APIs
+openai==1.102.0
+anthropic==0.68.0
+google-genai==1.38.0
+ollama==0.5.3
+
+# Web Interface
+gradio==5.46.1
+gradio-client==1.13.1
+
+# Document Processing and OCR
+PyMuPDF==1.26.3
+pymupdf4llm==0.0.27
+langchain-pymupdf4llm==0.4.1
+easyocr==1.7.2
+pdf2image==1.17.0
+lxml==6.0.0
+beautifulsoup4==4.13.4
+python-docx==1.2.0
+Pillow==10.4.0
+
+# Web Automation
+selenium==4.35.0
+webdriver-manager==4.0.2
+playwright==1.51.1
+
+# Vector Database and Search
+chromadb==1.0.16
+llama-index==0.13.1
+llama-index-core==0.13.1
+llama-index-embeddings-huggingface==0.6.0
+llama-index-postprocessor-flag-embedding-reranker==0.4.0
+llama-index-vector-stores-chroma==0.5.0
+llama-index-retrievers-bm25==0.6.3
+sentence-transformers==4.1.0
+rank-bm25==0.2.2
+git+https://github.com/FlagOpen/FlagEmbedding.git@1.3.5
+
+# Utility Libraries
+python-dotenv==1.1.1
+tiktoken==0.9.0
+requests==2.32.5
+pydantic==2.11.7
+typing-extensions==4.14.1
+
+# Database
+psycopg2-binary==2.9.10
+
+# Evaluation and Testing
+langfuse==3.5.0
+pytest==8.4.2
+pytest-asyncio==1.2.0
+pytest-cov==7.0.0
+
+# Data Analysis and ML
+numpy==2.2.5
+pandas==2.2.3
+scikit-learn==1.7.1
+rouge-score==0.1.2
+nltk==3.9.1
+torch==2.8.0
+
+# Visualization and Progress
+matplotlib==3.10.6
+seaborn==0.13.2
+tqdm==4.67.1
+
+# Development and Jupyter (optional)
+ipython==8.37.0
+jupyter-client==8.6.3
+jupyter-core==5.8.1
