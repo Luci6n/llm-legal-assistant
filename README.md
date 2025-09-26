@@ -56,7 +56,6 @@ A sophisticated multi-agent legal AI system specializing in Malaysian Civil Law,
 
 4. **Launch the Web Interface**:
    ```bash
-   cd app/web
    python launch.py
    ```
 
@@ -96,7 +95,7 @@ Provide case scenarios for:
 ### Model Selection
 The system supports multiple AI models:
 - `openai:gpt-4.1` (recommended)
-- `openai:gpt-4o-mini` (faster, cost-effective)
+- `openai:gpt-4.1-mini` (faster, cost-effective)
 - `anthropic:claude-3-sonnet`
 - `anthropic:claude-3-haiku`
 
@@ -166,7 +165,6 @@ llm-legal-assistant/
 │   │       └── utils/               # Helpers and shared utilities
 │   └── web/
 │       ├── gradio_interface.py      # Main web interface
-│       ├── launch.py                # Local launcher (port 7860)
 │       └── README.md
 ├── data/
 │   ├── processed/                   # Processed legal datasets (gitignored contents)
@@ -180,6 +178,7 @@ llm-legal-assistant/
 │   ├── tools_manager/
 │   └── vector_search/
 ├── README.md
+├── launch.py                        # Local launcher (port 7860)
 └── requirements.txt                 # Single consolidated dependency list
 ```
 

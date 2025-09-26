@@ -5,10 +5,7 @@ Modern launcher script for the Legal Assistant ChatInterface
 import os
 import sys
 
-# Add the current directory to Python path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-from gradio_interface import launch_interface
+from app.web.gradio_interface import launch_interface
 
 if __name__ == "__main__":
     print("🏛️ Starting Malaysian Civil Law Legal Assistant - Simplified Interface...")
@@ -24,8 +21,8 @@ if __name__ == "__main__":
         launch_interface(
             server_name="127.0.0.1",
             server_port=7860,
-            share=False,  # Enable sharing to avoid localhost issues
-            debug=True
+            share=False,  #Set to true to enable sharing via Gradio
+            debug=False  #Set to true to enable debug mode
         )
     except KeyboardInterrupt:
         print("\n👋 Chat interface stopped by user")
